@@ -1,0 +1,49 @@
+
+Apriltags2_ros git repository: https://github.com/dmalyuta/apriltags2_ros.git
+
+------------------------------------------------------------
+
+Camera Calibration
+
+To generate camera calibration file independent of ROS:
+> https://github.com/smidm/video2calibration.git
+
+------------------------------------------------------------
+
+Camera calibration using image_pipeline ROS package
+	
+	rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.0025 image:="image topic" camera:="camera name"
+	
+	The size parameter is the number of interior corners of the chessboard that is used for calibration. The square parameter is the size of a single square on the chessboard in meters.
+
+The calibrate button will freeze the video a couple seconds (maybe minutes). Then it will display cal in the window. Press commit to create the file in the appropriate .ros/camera_info directory or save and find the file in the /tmp file under root and move it to the appropriate folder.
+
+To use with BlueROV2 and udpvid node:
+camera cal in image_pipeline pack
+
+> rosrun udpvid vidcal.launch
+
+> rosrun camera_calibration cameracalibrator.py --size 8x7 --square 0.1 image:=/ROVcam/image_raw camera:=/ROVcam --no-service-check
+
+-----------------------------------------------
+
+BlueROV2 requires the gstreamer settings to be changed to:
+
+> ! multiudpsink clients=192.168.2.1:5600,192.168.2.1:5601
+
+------------------------------------------------------------
+
+Launch vidpublisher node and the apriltags2 node (requires apriltags2_ros node in the catkin workspace)
+
+Ensure the "size" parameter in the tags.yaml configuration file for apriltags2_ros is the size of just the black part without the 1 bit white border
+
+> roslaunch udpvid vidpublisher.launch camera_name:=/ROVcam image_rect:=/image_raw
+
+------------------------------------------------------------
+
+To record 10 second increments:
+
+> rosbag record /tag_detections --duration 10 -O Ex[experiment number]_[Tag type and light, V1, V2, T]_[Test number]_[distanc/angle]
+
+Example: 
+> rosbag record /tag_detections --duration 10 -O Ex2_V1_1_1
